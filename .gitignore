@@ -1,0 +1,28 @@
+# Python environments and caches
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# Private data: photos of people, logs with patient events, tuning data
+*.jpg
+*.jpeg
+*.png
+*.mp4
+*.avi
+server.log
+*.log
+journey_log.jsonl
+fetch_log.csv
+scores.csv
+
+# Model weights (large; downloaded by download_reid.py / ultralytics / insightface)
+*.pt
+*.onnx
+weights/
+
+# Local backups made while editing
+_backup_*/

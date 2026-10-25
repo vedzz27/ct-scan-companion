@@ -1,0 +1,8 @@
+# ByteTrack tuned for a fixed waiting-room camera processed at ~8 frames per second (TARGET_FPS).
+tracker_type: bytetrack
+track_high_thresh: 0.4    # confident detections drive the first matching pass
+track_low_thresh: 0.15    # weak detections (partly hidden people) can still extend a track
+new_track_thresh: 0.5     # don't start new tracks from weak or ghost detections
+track_buffer: 64          # processed frames a lost track is kept: ~8 s at 8 fps (walking behind a pillar)
+match_thresh: 0.8
+fuse_score: True

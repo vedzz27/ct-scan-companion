@@ -1,0 +1,75 @@
+{
+  "_about": "Target positions per scan protocol. Tolerances must be set and validated by the clinical team; these are demo values. Table frame: x along the table from the gantry end (0) to the foot end, y across the table (0 = centre line), metres.",
+
+  "default": "head_first_supine_arms_up",
+
+  "protocols": {
+    "head_first_supine_arms_up": {
+      "label": "Chest / abdomen",
+      "head_toward_gantry": true, "facing": "up", "arms": "up",
+      "ref_point": "head", "ref_x_m": [0.10, 0.45],
+      "tol": {"lateral_m": 0.05, "angle_deg": 8, "arms_margin_m": 0.0}
+    },
+    "head_first_supine_arms_down": {
+      "label": "Head / neck",
+      "head_toward_gantry": true, "facing": "up", "arms": "down",
+      "ref_point": "head", "ref_x_m": [0.05, 0.30],
+      "tol": {"lateral_m": 0.04, "angle_deg": 6, "arms_margin_m": 0.15}
+    },
+    "feet_first_supine_arms_up": {
+      "label": "Legs / pelvis",
+      "head_toward_gantry": false, "facing": "up", "arms": "up",
+      "ref_point": "feet", "ref_x_m": [0.10, 0.50],
+      "tol": {"lateral_m": 0.05, "angle_deg": 8, "arms_margin_m": 0.0}
+    }
+  },
+
+  "timing": {
+    "stable_s": 2.0,
+    "settle_s": 3.5,
+    "min_gap_s": 1.5,
+    "max_repeats": 3,
+    "unreadable_s": 8.0,
+    "moved_s": 1.5,
+    "min_kp_conf": 0.4,
+    "hysteresis": 1.3
+  },
+
+  "phrases": {
+    "en": {
+      "lie_down": "Please lie down on the table. I will help you get into position.",
+      "turn_around": "Please lie the other way round, with your {end} towards the scanner.",
+      "lie_on_back": "Please lie on your back, facing up.",
+      "straighten": "Please straighten your body along the table.",
+      "move_left_small": "Please move a little to your left.",
+      "move_right_small": "Please move a little to your right.",
+      "move_left": "Please move to your left.",
+      "move_right": "Please move to your right.",
+      "slide_toward_scanner": "Please slide a little towards the scanner.",
+      "slide_away": "Please slide a little away from the scanner.",
+      "raise_arms": "Please raise both arms above your head.",
+      "arms_down": "Please rest your arms by your sides.",
+      "hold_still": "Good. Please stay like this.",
+      "positioned": "Perfect. Please stay still. The technologist will check in a moment.",
+      "staff": "Thank you. A technologist will come and help you."
+    },
+    "de": {
+      "lie_down": "Bitte legen Sie sich auf den Tisch. Ich helfe Ihnen bei der Lagerung.",
+      "turn_around": "Bitte legen Sie sich andersherum, mit {end} zum Gerät.",
+      "lie_on_back": "Bitte legen Sie sich auf den Rücken.",
+      "straighten": "Bitte legen Sie sich gerade auf den Tisch.",
+      "move_left_small": "Bitte rutschen Sie ein kleines Stück nach links.",
+      "move_right_small": "Bitte rutschen Sie ein kleines Stück nach rechts.",
+      "move_left": "Bitte rutschen Sie nach links.",
+      "move_right": "Bitte rutschen Sie nach rechts.",
+      "slide_toward_scanner": "Bitte rutschen Sie ein wenig zum Gerät hin.",
+      "slide_away": "Bitte rutschen Sie ein wenig vom Gerät weg.",
+      "raise_arms": "Bitte heben Sie beide Arme über den Kopf.",
+      "arms_down": "Bitte legen Sie die Arme neben den Körper.",
+      "hold_still": "Gut. Bitte bleiben Sie so liegen.",
+      "positioned": "Perfekt. Bitte bleiben Sie ruhig liegen. Die MTR prüft gleich.",
+      "staff": "Danke. Eine MTR kommt gleich und hilft Ihnen."
+    }
+  },
+  "end_words": {"en": {"head": "head", "feet": "feet"}, "de": {"head": "dem Kopf", "feet": "den Füßen"}}
+}

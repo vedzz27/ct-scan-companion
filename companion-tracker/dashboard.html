@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Companion tracker</title>
+<link rel="icon" href="data:,">
+<style>
+  :root { --bg:#f4f5f7; --card:#fff; --ink:#1d2330; --muted:#667085; --line:#e3e6eb;
+          --ok:#1a7f37; --warn:#b35c00; --bad:#c62828; --accent:#2457c5; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.4 system-ui, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--ink); }
+  header { display:flex; align-items:center; gap:16px; padding:12px 20px; background:var(--card); border-bottom:1px solid var(--line); }
+  header h1 { font-size:18px; margin:0; }
+  #health { font-size:13px; padding:3px 10px; border-radius:999px; background:#eee; }
+  #health.ok { background:#dff3e4; color:var(--ok); } #health.bad { background:#fde2e1; color:var(--bad); }
+  main { display:grid; grid-template-columns: 440px 1fr; gap:16px; padding:16px 20px; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
+  .card h2 { font-size:15px; margin:0 0 10px; }
+  label { display:block; font-size:13px; color:var(--muted); margin:8px 0 3px; }
+  input, select { width:100%; padding:8px 10px; font-size:15px; border:1px solid var(--line); border-radius:6px; }
+  button { padding:9px 14px; font-size:15px; border-radius:6px; border:1px solid var(--accent); background:var(--accent); color:#fff; cursor:pointer; }
+  button.secondary { background:#fff; color:var(--accent); }
+  button.small { padding:4px 9px; font-size:13px; }
+  button:disabled { opacity:.6; cursor:wait; }
+  #checkin button { width:100%; margin-top:12px; }
+  #msg { margin-top:10px; font-size:14px; min-height:20px; }
+  #msg.ok { color:var(--ok); } #msg.bad { color:var(--bad); }
+  .cams { display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:12px; }
+  .cam img { width:100%; border-radius:6px; background:#222; min-height:180px; display:block; }
+  .cam .name { font-size:13px; color:var(--muted); margin-bottom:4px; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th, td { text-align:left; padding:7px 6px; border-bottom:1px solid var(--line); vertical-align:middle; }
+  th { font-size:12px; color:var(--muted); font-weight:600; }
+  .pill { padding:2px 8px; border-radius:999px; font-size:12px; white-space:nowrap; }
+  .p-go { background:#dff3e4; color:var(--ok); } .p-scan { background:#fff1db; color:var(--warn); }
+  .p-staff { background:#fde2e1; color:var(--bad); }
+  .muted { color:var(--muted); }
+  .stack > * + * { margin-top:16px; }
+  .right > * + * { margin-top:16px; }
+  .head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; }
+  .head h2 { margin:0; }
+  #calling { border:2px solid var(--accent); display:none; }
+  #calling.show { display:block; }
+  #calling .big { font-size:20px; font-weight:600; margin:2px 0 6px; }
+  #calling .where { font-size:16px; margin-bottom:6px; }
+  #calling .say { font-size:15px; background:#f1f5ff; border-radius:6px; padding:8px 10px; margin:8px 0; }
+  #calling img { width:100%; border-radius:6px; background:#222; min-height:200px; display:block; margin-top:8px; }
+  #calling .btns { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  tr.active td { background:#eef3ff; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Companion tracker</h1>
+  <span id="health">checking…</span>
+</header>
+<main>
+  <div class="stack">
+    <div class="card" id="checkin">
+      <h2>Check in</h2>
+      <div class="muted" style="font-size:13px">One person in front of the check-in camera, whole body visible, 2–3 m away.</div>
+      <label for="name">Name</label>
+      <input id="name" placeholder="e.g. Ana" autocomplete="off">
+      <label for="lang">Language</label>
+      <select id="lang"><option value="en">English</option><option value="de">Deutsch</option></select>
+      <label for="cam">Check-in camera</label>
+      <select id="cam"></select>
+      <button id="go">Take photos and check in</button>
+      <div id="msg"></div>
+    </div>
+    <div class="card">
+      <div class="head"><h2>Patients</h2><button id="callNext" class="small">Call next patient</button></div>
+      <table>
+        <thead><tr><th>Patient</th><th>Zone</th><th>Conf.</th><th>Robot would</th><th></th></tr></thead>
+        <tbody id="rows"><tr><td colspan="5" class="muted">Nobody checked in yet.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="right">
+    <div class="card" id="calling">
+      <div class="head"><h2>Now calling</h2><button class="small secondary" id="closeCall">Close</button></div>
+      <div class="big" id="cName"></div>
+      <div class="where" id="cWhere"></div>
+      <div class="say" id="cSay"></div>
+      <div class="muted" style="font-size:13px">Waiting-room camera, live: only the person the system thinks is this patient is highlighted.</div>
+      <img id="cImg" alt="where the patient is">
+      <div class="btns">
+        <button class="small" id="cRight">Right person ✓</button>
+        <button class="small secondary" id="cWrong">Wrong person ✗</button>
+        <button class="small secondary" id="cNext">Call next →</button>
+      </div>
+      <div id="cMsg" class="muted" style="margin-top:8px;font-size:13px"></div>
+    </div>
+    <div class="card">
+      <h2>Cameras</h2>
+      <div class="cams" id="cams"></div>
+    </div>
+  </div>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const api = (path, opt) => fetch('/api' + path, opt).then(async r => {
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.detail || ('HTTP ' + r.status));
+  return body;
+});
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+let camList = [];
+async function loadCameras() {
+  try { camList = await api('/cameras'); } catch { camList = []; }
+  const sel = $('cam');
+  sel.innerHTML = camList.filter(c => c.role === 'kiosk').map(c => `<option>${esc(c.name)}</option>`).join('')
+                 || '<option value="kiosk">kiosk</option>';
+  $('cams').innerHTML = camList.map(c => `
+    <div class="cam"><div class="name">${esc(c.name)} · ${esc(c.role)} · <span id="st-${esc(c.name)}">${esc(c.status)}</span></div>
+    <img id="img-${esc(c.name)}" alt="${esc(c.name)} camera"></div>`).join('')
+    || '<div class="muted">No cameras running. Check cameras.json and the terminal.</div>';
+}
+
+function refreshImages() {
+  const t = Date.now();
+  for (const c of camList) {
+    const img = $('img-' + c.name);
+    if (img) img.src = `/api/cameras/${encodeURIComponent(c.name)}.jpg?t=${t}`;
+  }
+}
+
+const ACTION = {
+  go_to_zone_and_confirm: ['p-go', 'go + use name'],
+  go_to_last_zone_and_scan: ['p-scan', 'go + ask QR (no name)'],
+  alert_staff: ['p-staff', 'ask staff'],
+};
+let patients = [], callingId = null;
+async function refreshPatients() {
+  let ps = [];
+  try { ps = await api('/patients'); } catch { return; }
+  patients = ps;
+  if (callingId && !ps.find(p => p.id === callingId)) closeCall();
+  renderCalling();
+  $('rows').innerHTML = ps.length ? ps.map(p => {
+    const [cls, txt] = ACTION[p.action] || ['', p.action];
+    return `<tr class="${p.id === callingId ? 'active' : ''}">
+      <td><b>${esc(p.name)}</b><br><span class="muted">${esc(p.id)} · ${esc(p.stage ?? '')}</span></td>
+      <td>${esc(p.zone)}${p.ambiguous ? ' <span class="pill p-scan">unsure</span>' : ''}<br>
+          <span class="muted">${p.age_s}s ago</span></td>
+      <td>${p.confidence}</td>
+      <td><span class="pill ${cls}">${esc(txt)}</span><br><span class="muted">→ ${esc(p.robot_target ?? p.zone)}</span></td>
+      <td><button class="small" data-call="${esc(p.id)}">Call</button>
+          <button class="small secondary" data-find="${esc(p.id)}">Find</button>
+          <button class="small secondary" data-done="${esc(p.id)}">Finish</button></td>
+    </tr>`; }).join('') : '<tr><td colspan="5" class="muted">Nobody checked in yet.</td></tr>';
+}
+
+async function refreshHealth() {
+  try {
+    const h = await api('/health');
+    $('health').textContent = h.ok ? `cameras ok · ${h.embedder} matching` : 'camera problem: see /api/health';
+    $('health').className = h.ok ? 'ok' : 'bad';
+    for (const c of h.cameras) {
+      const s = $('st-' + c.name);
+      if (s) s.textContent = `${c.status} · ${c.processed_fps} fps`;
+    }
+  } catch { $('health').textContent = 'app not reachable'; $('health').className = 'bad'; }
+}
+
+$('go').onclick = async () => {
+  const name = $('name').value.trim();
+  if (!name) { $('msg').textContent = 'Type a name first.'; $('msg').className = 'bad'; return; }
+  $('go').disabled = true; $('msg').textContent = 'Hold still… taking photos'; $('msg').className = '';
+  try {
+    const r = await api('/checkin', { method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ name, camera: $('cam').value, needs: { language: $('lang').value } }) });
+    $('msg').textContent = `Checked in ${r.name} as ${r.id} (${r.views} photos).` + (r.warning ? ' ⚠ ' + r.warning : '');
+    $('msg').className = 'ok'; $('name').value = '';
+    refreshPatients();
+  } catch (e) { $('msg').textContent = e.message; $('msg').className = 'bad'; }
+  $('go').disabled = false;
+};
+$('name').addEventListener('keydown', e => { if (e.key === 'Enter') $('go').click(); });
+
+$('rows').onclick = async (e) => {
+  const find = e.target.dataset.find, done = e.target.dataset.done, call = e.target.dataset.call;
+  if (call) callPatient(call);
+  if (find) window.open(`/api/patients/${encodeURIComponent(find)}/find.jpg?t=${Date.now()}`, '_blank');
+  if (done) { await api('/patients/' + encodeURIComponent(done), { method: 'DELETE' }).catch(() => {}); refreshPatients(); }
+};
+
+// ---- calling a patient: "it's your turn" -> where are they? --------------------------------
+async function callPatient(id) {
+  callingId = id;
+  $('cMsg').textContent = '';
+  $('calling').classList.add('show');
+  try { await api(`/journey/${encodeURIComponent(id)}/event`, { method: 'POST',
+        headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ type: 'call', source: 'dashboard' }) }); }
+  catch (e) { $('cMsg').textContent = 'Could not log the call: ' + e.message; }
+  await refreshPatients();
+  refreshCallImage();
+  $('calling').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function closeCall() { callingId = null; $('calling').classList.remove('show'); }
+function renderCalling() {
+  if (!callingId) return;
+  const p = patients.find(x => x.id === callingId);
+  if (!p) return;
+  $('cName').textContent = `${p.name}  (${p.id})`;
+  if (p.action === 'alert_staff') {
+    $('cWhere').innerHTML = `<span class="pill p-staff">not found</span> Not seen for ${Math.round(p.age_s)} s. Last zone: <b>${esc(p.zone)}</b>`;
+    $('cSay').textContent = 'Robot would ask staff for help.';
+  } else {
+    const sure = p.action === 'go_to_zone_and_confirm';
+    $('cWhere').innerHTML = `${sure ? '<span class="pill p-go">found</span>' : '<span class="pill p-scan">unsure</span>'}
+      Robot goes to <b>${esc(p.robot_target ?? p.zone)}</b> (zone ${esc(p.zone)}, confidence ${p.confidence}, seen ${p.age_s} s ago)`;
+    $('cSay').textContent = sure ? `Robot says: "Hello ${p.name}, it's your turn. Could you please show me your QR code?"`
+                                 : 'Robot says: "Hello, could you please show me your QR code?" (not sure who it is, so no name)';
+  }
+}
+function refreshCallImage() {
+  if (callingId) $('cImg').src = `/api/patients/${encodeURIComponent(callingId)}/find.jpg?t=${Date.now()}`;
+}
+function nextPatient() {
+  const waiting = patients.filter(p => ['checked_in', 'waiting'].includes(p.stage) && p.id !== callingId);
+  return waiting[0];
+}
+$('callNext').onclick = $('cNext').onclick = () => {
+  const p = nextPatient();
+  if (p) callPatient(p.id);
+  else { $('cMsg').textContent = 'Nobody else is waiting.'; if (!callingId) alertNoOne(); }
+};
+function alertNoOne() { $('msg').textContent = 'Nobody is waiting to be called.'; $('msg').className = 'bad'; }
+$('closeCall').onclick = closeCall;
+async function verdict(right) {
+  if (!callingId) return;
+  try { await api(`/journey/${encodeURIComponent(callingId)}/event`, { method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ type: right ? 'found_right' : 'found_wrong', source: 'dashboard' }) });
+        $('cMsg').textContent = right ? 'Noted: right person.' : 'Noted: wrong person.'; }
+  catch (e) { $('cMsg').textContent = e.message; }
+}
+$('cRight').onclick = () => verdict(true);
+$('cWrong').onclick = () => verdict(false);
+setInterval(refreshCallImage, 800);
+
+loadCameras().then(() => { refreshImages(); refreshHealth(); refreshPatients(); });
+setInterval(refreshImages, 700);
+setInterval(refreshPatients, 1500);
+setInterval(refreshHealth, 3000);
+</script>
+</body>
+</html>

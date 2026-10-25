@@ -1,0 +1,105 @@
+{
+  "_about": "The patient journey as data. New rooms or robot tasks are new entries here, not new code.",
+  "stages": [
+    "checked_in",
+    "waiting",
+    "called",
+    "to_changing_room",
+    "changing",
+    "ready",
+    "to_ct_room",
+    "in_ct_room",
+    "on_table",
+    "positioning",
+    "positioned",
+    "position_accepted",
+    "robot_left",
+    "scanning",
+    "scan_finished",
+    "aftercare",
+    "exiting",
+    "done"
+  ],
+  "zone_stage": {
+    "check_in": "checked_in",
+    "waiting_A": "waiting",
+    "waiting_B": "waiting",
+    "waiting_area": "waiting",
+    "changing_room": "changing",
+    "ct_door": "in_ct_room",
+    "ct_room": "in_ct_room",
+    "ct_table": "on_table",
+    "exit": "exiting"
+  },
+  "event_stage": {
+    "checkin": "checked_in",
+    "call": "called",
+    "guide_start": null,
+    "changing_ready": "ready",
+    "positioning_started": "positioning",
+    "positioned": "positioned",
+    "positioning_accepted": "position_accepted",
+    "robot_left": "robot_left",
+    "scan_started": "scanning",
+    "scan_finished": "scan_finished",
+    "aftercare_started": "aftercare",
+    "aftercare_done": "exiting",
+    "finish": "done"
+  },
+  "guide": {
+    "changing_room": {
+      "during": "to_changing_room",
+      "arrived": "changing"
+    },
+    "ct_room": {
+      "during": "to_ct_room",
+      "arrived": "in_ct_room"
+    },
+    "exit": {
+      "during": "exiting",
+      "arrived": "done"
+    }
+  },
+  "robot_task": {
+    "called": {
+      "task": "guide_to",
+      "target": "changing_room",
+      "say": "call_patient"
+    },
+    "ready": {
+      "task": "guide_to",
+      "target": "ct_room"
+    },
+    "on_table": {
+      "task": "position_check"
+    },
+    "positioning": {
+      "task": "position_check"
+    },
+    "position_accepted": {
+      "task": "leave_room",
+      "target": "ct_outside"
+    },
+    "scan_finished": {
+      "task": "aftercare",
+      "target": "ct_door"
+    },
+    "aftercare": {
+      "task": "aftercare",
+      "target": "ct_door"
+    },
+    "exiting": {
+      "task": "guide_to",
+      "target": "exit"
+    }
+  },
+  "robot_targets": {
+    "changing_room": "changing_room",
+    "ct_room": "ct_door",
+    "ct_outside": "ct_outside",
+    "ct_door": "ct_door",
+    "exit": "exit"
+  },
+  "zone_dwell_s": 2.0,
+  "zone_gap_s": 2.5
+}

@@ -1,0 +1,10 @@
+fastapi>=0.110
+uvicorn>=0.29
+numpy
+opencv-python
+scipy          # one-patient-per-person assignment (also installed with ultralytics)
+ultralytics>=8.4   # YOLO26 detector + ByteTrack (downloads yolo26n.pt on first run; falls back to yolov8n.pt)
+gdown          # only for download_reid.py (re-ID weights from Google Drive)
+insightface>=0.7   # face detection + recognition (buffalo_l: SCRFD + ArcFace; non-commercial weights)
+onnxruntime
+pyobjc-framework-AVFoundation; sys_platform == "darwin"   # pick cameras by name (cams.py)
